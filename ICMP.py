@@ -14,20 +14,31 @@ def checksum(string):
     count = 0
 
     while count < countTo:
-        thisVal = ord(string[count+1]) * 256 + ord(string[count])
+
+        if isinstance(string, str):
+            thisVal = ord(string[count + 1]) * 256 + ord(string[count])
+        else:
+            thisVal = string[count + 1] * 256 + string[count]
+
         csum = csum + thisVal
         csum = csum & 0xffffffff
         count = count + 2
+
     if countTo < len(string):
-        csum = csum + ord(string[len(string) - 1])
+
+        if isinstance(string, str):
+            csum = csum + ord(string[len(string) - 1])
+        else:
+            csum = csum + string[len(string) - 1]
         csum = csum & 0xffffffff
+
     csum = (csum >> 16) + (csum & 0xffff)
     csum = csum + (csum >> 16)
     answer = ~csum
     answer = answer & 0xffff
     answer = answer >> 8 | (answer << 8 & 0xff00)
+
     return answer
-    
     
 def receiveOnePing(mySocket, ID, timeout, destAddr):
     timeLeft = timeout
