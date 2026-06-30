@@ -121,8 +121,10 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
             bytesInDouble = struct.calcsize("d")
             timeSent = struct.unpack("d", recPacket[28:28 + bytesInDouble])[0]
             
+            ttl = struct.unpack("B", recPacket[8:9])[0]
+
             # Return the RTT
-            return timeReceived - timeSent
+            return (timeReceived - timeSent, ttl, sequence)
         
         #Fill in end
         
@@ -185,7 +187,8 @@ def doOnePing(destAddr, timeout):
    #Fill in end
     
     return delay
-    
+
+# Assume the packet is lost if no reply is received within 2000 ms. Changed from 1 to 2
 def ping(host, timeout=2):
 
     # timeout=1 means: If one second goes by without a reply from the server,
@@ -208,10 +211,13 @@ def ping(host, timeout=2):
             pckts_sent += 1
             delay = doOnePing(dest, timeout)
 
-            if isinstance(delay, float):
-                rtt_ms = delay * 1000
+            if isinstance(delay, tuple):
+                rtt_sec, ttl, seq = delay 
+                rtt_ms = rtt_sec * 1000
                 rtts.append(rtt_ms)
-                print(f"Reply from {dest}: time={rtt_ms:.2f}ms")
+
+                # Print a per-packet summary that includes: (a) Sequence number; (b) RTT in milliseconds
+                print(f"Reply from {dest}: seq={seq} ttl={ttl} time={rtt_ms:.2f}ms")
             else:
                 pckts_lost += 1
                 print(delay)
@@ -237,5 +243,3 @@ if __name__ == '__main__':
         host = input("Enter target host: ")
             
     ping(host)
-
-    
