@@ -15,12 +15,12 @@ def checksum(string):
     count = 0
 
     while count < countTo:
-        thisVal = ord(string[count+1]) * 256 + ord(string[count])
+        thisVal = string[count+1] * 256 + string[count] #removed ord
         csum = csum + thisVal
         csum = csum & 0xffffffff
         count = count + 2
     if countTo < len(string):
-        csum = csum + ord(string[len(string) - 1])
+        csum = csum + string[len(string) - 1] # removed ord 
         csum = csum & 0xffffffff
 
     csum = (csum >> 16) + (csum & 0xffff)
@@ -139,8 +139,10 @@ def sendOnePing(mySocket, destAddr, ID):
     # struct -- Interpret strings as packed binary data
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
     data = struct.pack("d", time.time())
+
     # Calculate the checksum on the data and the dummy header.
-    myChecksum = checksum(str(header + data))
+    # removed str() since header + data is a byte object in Python 3
+    myChecksum = checksum(header + data)
 
     # Get the right checksum, and put in the header
     if sys.platform == 'darwin':
@@ -182,10 +184,9 @@ def doOnePing(destAddr, timeout):
    
    #Fill in end
     
-
     return delay
     
-def ping(host, timeout=1):
+def ping(host, timeout=2):
 
     # timeout=1 means: If one second goes by without a reply from the server,
     # the client assumes that either the client's ping or the server's pong is lost
@@ -230,9 +231,11 @@ def ping(host, timeout=1):
     return delay
 
 if __name__ == '__main__':
-    host = input("Enter target host: ")
+    if len(sys.argv) > 1:
+            host = sys.argv[1]
+    else:
+        host = input("Enter target host: ")
+            
     ping(host)
-
-    # we can add here na something like ittype ping 127.0.0.1
 
     
