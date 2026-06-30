@@ -179,7 +179,6 @@ def doOnePing(destAddr, timeout):
 
     return delay
     
-    
 def ping(host, timeout=1):
 
     # timeout=1 means: If one second goes by without a reply from the server,
@@ -188,6 +187,10 @@ def ping(host, timeout=1):
     dest = gethostbyname(host)
     print("Pinging " + dest + " using Python:")
     print("")
+
+    # 1. RTT Summary Stats (+1) - At the end of the ping session, 
+    # display the minimum, maximum, and average RTT values, and 
+    # calculate the packet loss rate as a percentage.
     
     # Send ping requests to a server separated by approximately one second
     while 1 :
@@ -199,5 +202,7 @@ def ping(host, timeout=1):
 if __name__ == '__main__':
     print("Testing  LocalHost...")
     ping("127.0.0.1")
+
+    # we can add here na something like ittype ping 127.0.0.1
 
     
