@@ -163,6 +163,7 @@ def doOnePing(destAddr, timeout):
     #Fill in start
     
     #create socket
+    mySocket = socket(AF_INET, SOCK_RAW, icmp)
     
     #Fill in end
    
@@ -171,8 +172,13 @@ def doOnePing(destAddr, timeout):
     #Fill in start
     
     #send a single ping using the socket, dst addr and ID
+    sendOnePing(mySocket, destAddr, myID)
+    
     #add delay using timeout
+    delay = receiveOnePing(mySocket, myID, timeout, destAddr)
+    
     #close socket
+    mySocket.close()
    
    #Fill in end
     
@@ -185,23 +191,47 @@ def ping(host, timeout=1):
     # the client assumes that either the client's ping or the server's pong is lost
     
     dest = gethostbyname(host)
-    print("Pinging " + dest + " using Python:")
+    print("Pinging " + dest + " using Python (Ctrl+C to end):")
     print("")
 
     # 1. RTT Summary Stats (+1) - At the end of the ping session, 
     # display the minimum, maximum, and average RTT values, and 
     # calculate the packet loss rate as a percentage.
+    rtts = []
+    pckts_sent = 0
+    pckts_lost = 0 
     
     # Send ping requests to a server separated by approximately one second
-    while 1 :
-        delay = doOnePing(dest, timeout)
-        print(delay)
-        time.sleep(1)# one second
+    try: 
+        while 1 :
+            pckts_sent += 1
+            delay = doOnePing(dest, timeout)
+
+            if isinstance(delay, float):
+                rtt_ms = delay * 1000
+                rtts.append(rtt_ms)
+                print(f"Reply from {dest}: time={rtt_ms:.2f}ms")
+            else:
+                pckts_lost += 1
+                print(delay)
+            
+            time.sleep(1)# one second
+    except KeyboardInterrupt:
+        print("")
+        if pckts_sent > 0:
+            loss_rate = (pckts_lost / pckts_sent) * 100
+            print(f"Packets sent: {pckts_sent}, packets received: {pckts_sent - pckts_lost}, {loss_rate:.2f}% packet loss")
+
+        if rtts:
+            print(f"RTT min: {min(rtts):.2f}ms, RTT avg: {sum(rtts) / len(rtts):.2f}ms, RTT max: {max(rtts):.2f}ms")
+        
+        else:
+            print("No replies received.")
     return delay
 
 if __name__ == '__main__':
-    print("Testing  LocalHost...")
-    ping("127.0.0.1")
+    host = input("Enter target host: ")
+    ping(host)
 
     # we can add here na something like ittype ping 127.0.0.1
 
