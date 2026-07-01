@@ -111,8 +111,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
                 return f"[Err] Parameter Problem: Missing a required option (Type {type}, Code {code})"
             elif code == 2:
                 return f"[Err] Parameter Problem: Bad Length (Type {type}, Code {code})"
-        if ID != id:
-            return f"[Err] Expected id={ID}, but got id={id}"
         
         if type == 0:
             if id != ID:
