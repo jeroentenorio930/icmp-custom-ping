@@ -52,6 +52,10 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         # type (1), code (1), checksum (2), ID(2), sequence (2) <-- given ni miss
         type, code, checksum, id, sequence = struct.unpack("bbHHh", recPacket[20:28])
 
+        # (TEST CASE) temporary override for test case 3
+        # type = 3
+        # code = 1
+
         # Type and code must be set to 0.
         # ICMP Error Parsing (+1) -  Parse and display ICMP error codes 
         # (e.g., Destination Network/Host Unreachable, TTL Expired) 
@@ -166,6 +170,9 @@ def doOnePing(destAddr, timeout):
     
     #create socket
     mySocket = socket(AF_INET, SOCK_RAW, icmp)
+
+    # (TEST CASE) simulate error type 11
+    # mySocket.setsockopt(IPPROTO_IP, IP_TTL, 2)
     
     #Fill in end
    
